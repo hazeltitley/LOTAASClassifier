@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<project name="Ant-Test" default="main" basedir=".">
+	<!-- Sets variables which can later be used. -->
+	<!-- The value of a property is accessed via ${} -->
+	<property name="src.dir" location="src" />
+	<property name="build.dir" location="build" />
+	<property name="dist.dir" location="dist" />
+	<property name="docs.dir" location="docs" />
+	<property name="resources.dir" location="resources" />
+
+	<!-- Deletes the existing build, docs and dist directory -->
+	<target name="clean">
+		<delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" />
+		<delete dir="${docs.dir}" />
+	</target>
+
+	<!-- Creates the build, docs and dist directory -->
+	<target name="makedir">
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${docs.dir}" />
+	</target>
+
+	<!-- Compiles the java code (including the usage of library for JUnit (source="1.5" target="1.5") -->
+	<target name="compile" depends="clean, makedir">
+		<javac srcdir="${src.dir}" destdir="${build.dir}"
+			   includeantruntime="false" source="1.5" target="1.5"
+			   classpath="${resources.dir}/moa.jar:${resources.dir}/weka.jar">
+		</javac>
+	</target>
+
+	<!-- Creates Javadoc -->
+	<target name="docs" depends="compile">
+		<javadoc packagenames="src" sourcepath="${src.dir}" destdir="${docs.dir}">
+			<!-- Define which files / directory should get included, we include all but... -->
+			<fileset dir="${src.dir}"/>
+		</javadoc>
+	</target>
+
+	<!-- Build the jar. -->
+	<target name="jar" depends="compile">
+		<jar destfile="${dist.dir}\LOTAASClassifier.jar" basedir="${build.dir}">
+			<fileset dir="${build.dir}">
+				<include name="**/*.class" />
+			</fileset>
+			<fileset dir="${src.dir}">
+				<include name="**/*.java" />
+			</fileset>
+			<zipgroupfileset dir="Resources" includes="*.jar" excludes="*.config" />
+			<zipfileset dir="${resources.dir}" includes="**/*.jar" prefix="Resources" />
+			<manifest>
+				<attribute name="Main-Class" value="com.scienceguyrob.lotaasclassifier.LotaasClassifier" />
+			</manifest>
+		</jar>
+	</target>
+
+	<!--Creates the deployable jar file -->
+	<target name="main" depends="compile,jar,docs">
+		<description>Main target</description>
+	</target>
+
+</project>
